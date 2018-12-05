@@ -12,7 +12,7 @@ library(readxl)
 library(PCAmixdata)
 library(data.table)
 library(arules)
-
+library(export)
 ##Import database
 Absenteeism_at_work <- read_excel("Downloads/Absenteeism_at_work_edited.xls")
 
@@ -84,11 +84,16 @@ t <- ggplot(absent, aes(x = absent$`Body mass index`, fill = absent$`Body mass i
 plot_boxplot(absent, by = "Absenteeism time in hours")
 pairs(absent)
 #Here I choose to separate factor and numeric
-
+col3 <- c(1,col2)
 numVariable <- absent[-col2]
-factVariable <- absent[1,col2]
+factVariable <- absent[col3]
 
 numVariable <- group_by(numVariable,numVariable$ID)
+factVariable <- group_by(factVariable,factVariable$ID)
+factVariable
+
+factVariableByPeople <- summarize(factVariable, ReasonByPeople = mean(`Reason for absence`))
+factVariableByPeople
 numVariable
 numVarByPeople <- summarize(numVariable, dist = mean(`Distance from Residence to Work`, na.rm = T),
                     serviceTime = mean(`Service time`, na.rm = T),
@@ -130,6 +135,67 @@ plot(resAcp,choice="cor")
 plot(resAcp,choice="cor",axes = c(1,3))
 plot(absent$`Body mass index`,absent$`Absenteeism time in hours`)
 
+FirstPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 1))
+TwoPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 2))
+ThreePeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 3))
+FourPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 4))
+FivePeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 5))
+SixPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 6))
+SevenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 7))
+EightPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 8))
+NinePeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 9))
+TenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 10))
+ElevenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 11))
+TwelvePeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 12))
+ThirteenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 13))
+FourteenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 14))
+FifteenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 15))
+SixteenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 16))
+SeventeenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 17))
+EigthteenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 18))
+NineteenFirstPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 19))
+TwentyFirstPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 20))
+Twenty1FirstPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 21))
+Twenty2PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 22))
+Twenty3PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 23))
+Twenty4PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 24))
+Twenty5PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 25))
+Twenty6PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 26))
+Twenty7PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 27))
+Twenty8PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 28))
+Twenty9PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 29))
+ThirtyPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 30))
+Thirty1PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 31))
+Thirty2PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 32))
+Thirty3PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 33))
+Thirty4PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 34))
+Thirty5PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 35))
+Thirty6PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 36))
+
+summary(FirstPeopleFiltered)
+summary(TwoPeopleFiltered)
+summary(ThreePeopleFiltered)
+summary(FourPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+summary(FirstPeopleFiltered)
+
+Reason <-  as.data.frame(FirstPeopleFiltered %>% group_by(FirstPeopleFiltered$`Reason for absence`) %>% 
+                           summarise(count= n(), percent = round(count*100/nrow(FirstPeopleFiltered),1))%>% arrange(desc(count)))
+Reason
+ggplot(Reason,aes(x = reorder(FirstPeopleFiltered$`Reason for absence`,percent), y= percent, fill= FirstPeopleFiltered$`Reason for absence`)) + geom_bar(stat = 'identity') + coord_flip() + theme(legend.position='none') + geom_text(aes(label = percent), vjust = 0.5, hjust = 1.1) + xlab('Reason for absence')
+
 #Clustering :
 absent1 <- absent
 absent1$`Reason for absence`<-NULL
@@ -138,6 +204,7 @@ absent1$`Day of the week`<-NULL
 absent1$Education<-NULL
 absent1$`Social drinker`<-NULL
 absent1$`Social smoker`<-NULL
+absent1$`Type of Absenteism` <- NULL
 kmeans.result<-kmeans(absent1,3)
 kmeans.result
 table(absent$`Day of the week`, kmeans.result$cluster)
@@ -149,3 +216,4 @@ plot(absent1[c("Body mass index", "Absenteeism time in hours")], col = kmeans.re
        #col = 1:3, pch = 8, cex = 2) 
 rules.all <- apriori(absent[col])
 inspect(rules.all)
+export::table2excel(numVarByPeople)
