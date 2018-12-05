@@ -111,25 +111,43 @@ factVariable
 pairs(factVariable)
 factVariableByPeople <- summarize(factVariable, ReasonByPeople = max(`Reason for absence`))
 factVariableByPeople
-
-
+summary(absent[-1])
+export::table2excel(summ)
+col4 <- c(2:4,9,10)
+col5 <- c(5:10)
 #This is to see if there any correlation between the total hours of absence and the other variables
 #We can also see that service time and age are connected.
-graphCor1 <- pairs(numVarByPeople)
-export::
+pairs(numVarByPeople[col5])
 #This one is more particular, it exprims the relation between distance_from_work and total hour of absence
 plot(numVarByPeople$dist,numVarByPeople$totalAbs)
-
+cor(absent$`Service time`,absent$Age)
 #This gives the correlation between them
 cor(numVarByPeople$totalAbs,numVarByPeople$dist)
-
+res <- lm(numVarByPeople$serviceTime~numVarByPeople$age)
+summary(res)
 #Let's check if we can find any linear combination to explain the variable totalAbs
-linearReg <- lm(numVarByPeople$totalAbs~numVarByPeople$dist
-                +numVarByPeople$age
-                +numVarByPeople$workLoad
-                +numVarByPeople$son
-                +numVarByPeople$bodyMassIndex)
+linearReg <- lm(absent$`Absenteeism time in hours`~ absent$`Reason for absence`
+                +absent$`Month of absence`
+                +absent$`Day of the week`
+                +absent$`Work load Average/day`
+                +absent$`Hit target`
+                +absent$`Distance from Residence to Work`
+                +absent$`Service time`
+                +absent$Age
+                +absent$Education
+                +absent$Son
+                +absent$`Social drinker`
+                +absent$`Social smoker`
+                +absent$`Body mass index`)
 summary(linearReg)
+step(linearReg)
+linearReg2 <- lm(absent$`Absenteeism time in hours`~ absent$`Reason for absence`
+                 +absent$`Day of the week`
+                 +absent$`Distance from Residence to Work`
+                 +absent$Age
+                 +absent$Son
+                 +absent$`Social drinker`)
+summary(linearReg2)
 #With the R-squared error we can say that only 7% of the variable is explain by the model, so the linear model is not a good choice.
 #Since every data is numeric, we can perform ACP, first, we need the dataset to be a dataframe type. Let's cast it that way
 df = as.data.frame(numVarByPeople)
