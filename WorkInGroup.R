@@ -13,6 +13,7 @@ library(PCAmixdata)
 library(data.table)
 library(arules)
 library(export)
+library(klaR)
 ##Import database
 Absenteeism_at_work <- read_excel("Downloads/Absenteeism_at_work_edited.xls")
 
@@ -89,11 +90,7 @@ numVariable <- absent[-col2]
 factVariable <- absent[col3]
 
 numVariable <- group_by(numVariable,numVariable$ID)
-factVariable <- group_by(factVariable,factVariable$ID)
-factVariable
 
-factVariableByPeople <- summarize(factVariable, ReasonByPeople = mean(`Reason for absence`))
-factVariableByPeople
 numVariable
 numVarByPeople <- summarize(numVariable, dist = mean(`Distance from Residence to Work`, na.rm = T),
                     serviceTime = mean(`Service time`, na.rm = T),
@@ -102,17 +99,24 @@ numVarByPeople <- summarize(numVariable, dist = mean(`Distance from Residence to
                     HitTarget = mean(`Hit target`, na.rm = T),
                     son = mean(`Son`, na.rm = T),
                     bodyMassIndex = mean(`Body mass index`, na.rm = T),
-                    AbsInHours = mean(`Absenteeism time in hours`, na.rm = T),
-                    countOfAbs = n(),
+                    meanOfAbs = mean(`Absenteeism time in hours`, na.rm = T),
                     totalAbs = sum(`Absenteeism time in hours`, na.rm = T))
 numVarByPeople
 str(absent)
 numVarByPeopleFiltered <- as.data.frame( numVarByPeople %>% select(everything()) %>% filter(numVarByPeople$AbsInHours < 30))
 
+#Doing the same with factor variables
+factVariable <- group_by(factVariable,ID)
+factVariable
+pairs(factVariable)
+factVariableByPeople <- summarize(factVariable, ReasonByPeople = max(`Reason for absence`))
+factVariableByPeople
+
+
 #This is to see if there any correlation between the total hours of absence and the other variables
 #We can also see that service time and age are connected.
-pairs(numVarByPeople)
-
+graphCor1 <- pairs(numVarByPeople)
+export::
 #This one is more particular, it exprims the relation between distance_from_work and total hour of absence
 plot(numVarByPeople$dist,numVarByPeople$totalAbs)
 
@@ -194,9 +198,10 @@ summary(FirstPeopleFiltered)
 Reason <-  as.data.frame(FirstPeopleFiltered %>% group_by(FirstPeopleFiltered$`Reason for absence`) %>% 
                            summarise(count= n(), percent = round(count*100/nrow(FirstPeopleFiltered),1))%>% arrange(desc(count)))
 Reason
+pie
 ggplot(Reason,aes(x = reorder(FirstPeopleFiltered$`Reason for absence`,percent), y= percent, fill= FirstPeopleFiltered$`Reason for absence`)) + geom_bar(stat = 'identity') + coord_flip() + theme(legend.position='none') + geom_text(aes(label = percent), vjust = 0.5, hjust = 1.1) + xlab('Reason for absence')
 
-#Clustering :
+#Clustering K-means:
 absent1 <- absent
 absent1$`Reason for absence`<-NULL
 absent1$`Month of absence`<-NULL
@@ -214,6 +219,13 @@ table(absent$Son, kmeans.result$cluster)
 plot(absent1[c("Body mass index", "Absenteeism time in hours")], col = kmeans.result$cluster)
 #points(kmeans.result$centers[, c("Sepal.Length", "Sepal.Width")],
        #col = 1:3, pch = 8, cex = 2) 
+
+#Clustering K-Modes :
+kmodes.result <- kmodes(absent,5)
+kmodes.result
+kmodes.result$cluster
+modes <- kmodes.result$modes
 rules.all <- apriori(absent[col])
 inspect(rules.all)
 export::table2excel(numVarByPeople)
+export::table2excel(modes)
