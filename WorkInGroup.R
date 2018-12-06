@@ -18,7 +18,7 @@ library(ISLR)
 library(class)
 ##Import database
 Absenteeism_at_work <- read_excel("Downloads/Absenteeism_at_work_edited.xls")
-
+Rtable_with_reason_of_absence <- read_excel("Downloads/Rtable_with_reason_of_absence.xlsx")
 class(Absenteeism_at_work)
 
 #View it on a table format
@@ -172,14 +172,19 @@ abline(a=0.34, b=0.19, col = "red", lwd = 3)
 #This shows that Smoking is not really inluencing Absenteeism, to find the second abline, I substract the coef of social smoker 0.32 to intercept
 #Clustering K-Modes :
 kmodes.result <- kmodes(absent,10)
-IDkmodes.result <- kmodes(numVarByPeople, 5)
-IDkmodes.result
 kmodes.result
 kmodes.result$cluster
-IDmodes <- IDkmodes.result$modes
 modes <- kmodes.result$modes
-rules.all <- apriori(absent[col])
-inspect(rules.all)
+#IDkmodes
+IDkmodes.result <- kmodes(numVarByPeople, 5)
+IDkmodes.result
+IDmodes <- IDkmodes.result$modes
+newgoodDB <- as.data.frame(Rtable_with_reason_of_absence)
+Rtable_with_reason_of_absence[2:3] <- lapply(Rtable_with_reason_of_absence[2:3], factor)
+IDkmodes2.result <- kmodes(newgoodDB, 5)
+IDkmodes2.result
+IDmodes2 <- IDkmodes2.result$modes
+#export
 export::table2excel(numVarByPeople)
 export::table2excel(modes)
 export::table2excel(IDmodes)
