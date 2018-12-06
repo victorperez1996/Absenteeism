@@ -14,6 +14,8 @@ library(data.table)
 library(arules)
 library(export)
 library(klaR)
+library(ISLR)
+library(class)
 ##Import database
 Absenteeism_at_work <- read_excel("Downloads/Absenteeism_at_work_edited.xls")
 
@@ -78,10 +80,7 @@ summary(absent)
 class(absent)
 #We select every time where the personn has effectively been away
 absent <- as.data.frame(absent)
-
-s <- ggplot(absent, aes(x = Son, fill = Son)) + geom_bar()
-boxplot(absent, by=`Absenteeism time in hours`)
-t <- ggplot(absent, aes(x = absent$`Body mass index`, fill = absent$`Body mass index`)) + geom_bar()
+boxplot(absent$`Absenteeism time in hours`)
 plot_boxplot(absent, by = "Absenteeism time in hours")
 pairs(absent)
 #Here I choose to separate factor and numeric
@@ -91,7 +90,6 @@ factVariable <- absent[col3]
 
 numVariable <- group_by(numVariable,numVariable$ID)
 
-numVariable
 numVarByPeople <- summarize(numVariable, dist = mean(`Distance from Residence to Work`, na.rm = T),
                     serviceTime = mean(`Service time`, na.rm = T),
                     age = mean(`Age`, na.rm = T),
@@ -106,25 +104,23 @@ str(absent)
 numVarByPeopleFiltered <- as.data.frame( numVarByPeople %>% select(everything()) %>% filter(numVarByPeople$AbsInHours < 30))
 
 #Doing the same with factor variables
-factVariable <- group_by(factVariable,ID)
-factVariable
 pairs(factVariable)
-factVariableByPeople <- summarize(factVariable, ReasonByPeople = max(`Reason for absence`))
-factVariableByPeople
-summary(absent[-1])
-export::table2excel(summ)
+
 col4 <- c(2:4,9,10)
 col5 <- c(5:10)
 #This is to see if there any correlation between the total hours of absence and the other variables
 #We can also see that service time and age are connected.
 pairs(numVarByPeople[col5])
+
 #This one is more particular, it exprims the relation between distance_from_work and total hour of absence
 plot(numVarByPeople$dist,numVarByPeople$totalAbs)
-cor(absent$`Service time`,absent$Age)
-#This gives the correlation between them
 cor(numVarByPeople$totalAbs,numVarByPeople$dist)
+
+#This gives the correlation between service time and age
+cor(absent$`Service time`,absent$Age)
 res <- lm(numVarByPeople$serviceTime~numVarByPeople$age)
 summary(res)
+
 #Let's check if we can find any linear combination to explain the variable totalAbs
 linearReg <- lm(absent$`Absenteeism time in hours`~ absent$`Reason for absence`
                 +absent$`Month of absence`
@@ -157,62 +153,6 @@ plot(resAcp,choice="cor")
 plot(resAcp,choice="cor",axes = c(1,3))
 plot(absent$`Body mass index`,absent$`Absenteeism time in hours`)
 
-FirstPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 1))
-TwoPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 2))
-ThreePeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 3))
-FourPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 4))
-FivePeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 5))
-SixPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 6))
-SevenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 7))
-EightPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 8))
-NinePeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 9))
-TenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 10))
-ElevenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 11))
-TwelvePeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 12))
-ThirteenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 13))
-FourteenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 14))
-FifteenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 15))
-SixteenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 16))
-SeventeenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 17))
-EigthteenPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 18))
-NineteenFirstPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 19))
-TwentyFirstPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 20))
-Twenty1FirstPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 21))
-Twenty2PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 22))
-Twenty3PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 23))
-Twenty4PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 24))
-Twenty5PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 25))
-Twenty6PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 26))
-Twenty7PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 27))
-Twenty8PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 28))
-Twenty9PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 29))
-ThirtyPeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 30))
-Thirty1PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 31))
-Thirty2PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 32))
-Thirty3PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 33))
-Thirty4PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 34))
-Thirty5PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 35))
-Thirty6PeopleFiltered <- as.data.frame( absent %>% select(everything()) %>% filter(absent$ID == 36))
-
-summary(FirstPeopleFiltered)
-summary(TwoPeopleFiltered)
-summary(ThreePeopleFiltered)
-summary(FourPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-summary(FirstPeopleFiltered)
-
 Reason <-  as.data.frame(FirstPeopleFiltered %>% group_by(FirstPeopleFiltered$`Reason for absence`) %>% 
                            summarise(count= n(), percent = round(count*100/nrow(FirstPeopleFiltered),1))%>% arrange(desc(count)))
 Reason
@@ -237,9 +177,19 @@ table(absent$Son, kmeans.result$cluster)
 plot(absent1[c("Body mass index", "Absenteeism time in hours")], col = kmeans.result$cluster)
 #points(kmeans.result$centers[, c("Sepal.Length", "Sepal.Width")],
        #col = 1:3, pch = 8, cex = 2) 
+model1 <- lm(absent$`Absenteeism time in hours`~absent$Age+absent$`Social smoker`)
+plot(absent$Age[absent$`Social smoker`=="No"],absent$`Absenteeism time in hours`[absent$`Social smoker`=="No"],
+     col="blue",ylim = c(0,100), xlab = "Age", ylab = "Absenteism", main = "Absenteeism vs Age,Smoke")
 
+points(absent$Age[absent$`Social smoker`=="Yes"],absent$`Absenteeism time in hours`[absent$`Social smoker`=="Yes"],
+     col="red", pch = 16)
+legend(25,100,legend = c("Non Smoker","Smoker"), col = c("blue","red"), pch = c(1,16), bty = "n")
+
+abline(a=0.66,b=0.19, col = "blue", lwd = 3)
+abline(a=0.34, b=0.19, col = "red", lwd = 3)
+#This shows that Smoking is not really inluencing Absenteeism, to find the second abline, I substract the coef of social smoker 0.32 to intercept
 #Clustering K-Modes :
-kmodes.result <- kmodes(absent,5)
+kmodes.result <- kmodes(absent,20)
 kmodes.result
 kmodes.result$cluster
 modes <- kmodes.result$modes
@@ -247,3 +197,52 @@ rules.all <- apriori(absent[col])
 inspect(rules.all)
 export::table2excel(numVarByPeople)
 export::table2excel(modes)
+
+#Decision Tree :
+require(tree)
+hist(absent$`Absenteeism time in hours`)
+tree.absent = tree(absent$`Type of Absenteism`~absent$, data = absent)
+
+
+#independance de variables :
+chisq.test(absent$`Absenteeism time in hours`,absent$`Reason for absence`)
+chisq.test(absent$`Absenteeism time in hours`,absent$`Month of absence`)
+chisq.test(absent$`Absenteeism time in hours`,absent$`Day of the week`)
+chisq.test(absent$`Absenteeism time in hours`,absent$`Work load Average/day`)
+chisq.test(absent$`Absenteeism time in hours`,absent$`Hit target`)
+chisq.test(absent$`Absenteeism time in hours`,absent$`Type of Absenteism`)
+chisq.test(absent$`Absenteeism time in hours`,absent$`Distance from Residence to Work`)
+cor(numVarByPeople)
+shapiro.test(absent)
+shapiro.test(numVariable)
+shapiro.test(Absenteeism_at_work$`Absenteeism time in hours`) #cette distribution n'est pas normale
+shapiro.test(numVarByPeople$totalAbs) #cette distribution n'est pas normale
+
+
+##Classification with nearest neighbourg
+
+#First, we split our dataset in one training data and one testing data.
+ind <- sample(2, nrow(Absenteeism_at_work), replace = TRUE, prob = c(0.7, 0.3))
+train.data <- Absenteeism_at_work[ind == 1, ]
+test.data <- Absenteeism_at_work[ind == 2, ]
+#Then we transform the type of "Type of Absenteeism" from character to factor because kNN algo return a factor
+test.data[10] <- lapply(test.data[10], factor)
+#We create a vector with only type of Absenteeism label
+train.labels <- train.data$`Type of Absenteism`
+train.labels
+col6 <- c(9,10)
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+dfNormTrain <- as.data.frame(lapply(train.data[-col6], normalize))
+dfNormTest <- as.data.frame(lapply(test.data[-col6], normalize))
+#We launch the kNN algorithm, this algorithm will return a vector with the estimated value of test.data$'Type of Absenteeism'
+new <- knn(train = dfNormTrain, test = dfNormTest, cl = train.labels,k=16)
+#Then, thanks to library arsenal, we're able to compare, effective value and estimated value
+library(arsenal)
+compare(test.data$`Type of Absenteism`,new)
+x<-data.frame("Real"=test.data$`Type of Absenteism`,"Calculated"=new)
+
+#From the output of the algorithm, we can say that this model isn't a good one because the estimation of type of Absenteeism
+#is only accurate at 64,25%
+
