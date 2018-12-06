@@ -98,11 +98,13 @@ numVarByPeople <- summarize(numVariable, dist = mean(`Distance from Residence to
                     son = mean(`Son`, na.rm = T),
                     bodyMassIndex = mean(`Body mass index`, na.rm = T),
                     meanOfAbs = mean(`Absenteeism time in hours`, na.rm = T),
+                    numbOfAbs = n(),
                     totalAbs = sum(`Absenteeism time in hours`, na.rm = T))
 numVarByPeople
 str(absent)
-numVarByPeopleFiltered <- as.data.frame( numVarByPeople %>% select(everything()) %>% filter(numVarByPeople$AbsInHours < 30))
-
+plot(numVarByPeople$meanOfAbs,numVarByPeople$age)
+points(numVarByPeople$meanOfAbs[numVarByPeople$meanOfAbs==32.75],numVarByPeople$age[numVarByPeople$age==58],
+       col="red", pch = 16)
 #Doing the same with factor variables
 pairs(factVariable)
 
@@ -111,7 +113,7 @@ col5 <- c(5:10)
 #This is to see if there any correlation between the total hours of absence and the other variables
 #We can also see that service time and age are connected.
 pairs(numVarByPeople[col5])
-
+pairs(numVarByPeople[col4])
 #This one is more particular, it exprims the relation between distance_from_work and total hour of absence
 plot(numVarByPeople$dist,numVarByPeople$totalAbs)
 cor(numVarByPeople$totalAbs,numVarByPeople$dist)
@@ -120,6 +122,8 @@ cor(numVarByPeople$totalAbs,numVarByPeople$dist)
 cor(absent$`Service time`,absent$Age)
 res <- lm(numVarByPeople$serviceTime~numVarByPeople$age)
 summary(res)
+
+#Linear Regression :
 
 #Let's check if we can find any linear combination to explain the variable totalAbs
 linearReg <- lm(absent$`Absenteeism time in hours`~ absent$`Reason for absence`
@@ -137,6 +141,7 @@ linearReg <- lm(absent$`Absenteeism time in hours`~ absent$`Reason for absence`
                 +absent$`Body mass index`)
 summary(linearReg)
 step(linearReg)
+
 linearReg2 <- lm(absent$`Absenteeism time in hours`~ absent$`Reason for absence`
                  +absent$`Day of the week`
                  +absent$`Distance from Residence to Work`
@@ -153,30 +158,7 @@ plot(resAcp,choice="cor")
 plot(resAcp,choice="cor",axes = c(1,3))
 plot(absent$`Body mass index`,absent$`Absenteeism time in hours`)
 
-Reason <-  as.data.frame(FirstPeopleFiltered %>% group_by(FirstPeopleFiltered$`Reason for absence`) %>% 
-                           summarise(count= n(), percent = round(count*100/nrow(FirstPeopleFiltered),1))%>% arrange(desc(count)))
-Reason
-pie
-ggplot(Reason,aes(x = reorder(FirstPeopleFiltered$`Reason for absence`,percent), y= percent, fill= FirstPeopleFiltered$`Reason for absence`)) + geom_bar(stat = 'identity') + coord_flip() + theme(legend.position='none') + geom_text(aes(label = percent), vjust = 0.5, hjust = 1.1) + xlab('Reason for absence')
 
-#Clustering K-means:
-absent1 <- absent
-absent1$`Reason for absence`<-NULL
-absent1$`Month of absence`<-NULL
-absent1$`Day of the week`<-NULL
-absent1$Education<-NULL
-absent1$`Social drinker`<-NULL
-absent1$`Social smoker`<-NULL
-absent1$`Type of Absenteism` <- NULL
-kmeans.result<-kmeans(absent1,3)
-kmeans.result
-table(absent$`Day of the week`, kmeans.result$cluster)
-table(absent$`Reason for absence`, kmeans.result$cluster)
-table(absent$Education, kmeans.result$cluster)
-table(absent$Son, kmeans.result$cluster)
-plot(absent1[c("Body mass index", "Absenteeism time in hours")], col = kmeans.result$cluster)
-#points(kmeans.result$centers[, c("Sepal.Length", "Sepal.Width")],
-       #col = 1:3, pch = 8, cex = 2) 
 model1 <- lm(absent$`Absenteeism time in hours`~absent$Age+absent$`Social smoker`)
 plot(absent$Age[absent$`Social smoker`=="No"],absent$`Absenteeism time in hours`[absent$`Social smoker`=="No"],
      col="blue",ylim = c(0,100), xlab = "Age", ylab = "Absenteism", main = "Absenteeism vs Age,Smoke")
@@ -189,15 +171,18 @@ abline(a=0.66,b=0.19, col = "blue", lwd = 3)
 abline(a=0.34, b=0.19, col = "red", lwd = 3)
 #This shows that Smoking is not really inluencing Absenteeism, to find the second abline, I substract the coef of social smoker 0.32 to intercept
 #Clustering K-Modes :
-kmodes.result <- kmodes(absent,20)
+kmodes.result <- kmodes(absent,10)
+IDkmodes.result <- kmodes(numVarByPeople, 5)
+IDkmodes.result
 kmodes.result
 kmodes.result$cluster
+IDmodes <- IDkmodes.result$modes
 modes <- kmodes.result$modes
 rules.all <- apriori(absent[col])
 inspect(rules.all)
 export::table2excel(numVarByPeople)
 export::table2excel(modes)
-
+export::table2excel(IDmodes)
 #Decision Tree :
 require(tree)
 hist(absent$`Absenteeism time in hours`)
@@ -230,7 +215,7 @@ test.data[10] <- lapply(test.data[10], factor)
 #We create a vector with only type of Absenteeism label
 train.labels <- train.data$`Type of Absenteism`
 train.labels
-col6 <- c(9,10)
+col6 <- c(8,9,10)
 normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
