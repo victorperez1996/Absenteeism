@@ -16,6 +16,7 @@ library(export)
 library(klaR)
 library(ISLR)
 library(class)
+library(mclust)
 ##Import database
 Absenteeism_at_work <- read_excel("Downloads/Absenteeism_at_work_edited.xls")
 Rtable_with_reason_of_absence <- read_excel("Downloads/Rtable_with_reason_of_absence.xlsx")
@@ -139,9 +140,11 @@ linearReg <- lm(absent$`Absenteeism time in hours`~ absent$`Reason for absence`
                 +absent$`Social drinker`
                 +absent$`Social smoker`
                 +absent$`Body mass index`)
+linearReg3 <- lm(absent$`Absenteeism time in hours`~absent$`Day of the week`)
+summary(linearReg3)
 summary(linearReg)
 step(linearReg)
-
+linearReg$coefficients
 linearReg2 <- lm(absent$`Absenteeism time in hours`~ absent$`Reason for absence`
                  +absent$`Day of the week`
                  +absent$`Distance from Residence to Work`
@@ -188,6 +191,7 @@ IDmodes2 <- IDkmodes2.result$modes
 export::table2excel(numVarByPeople)
 export::table2excel(modes)
 export::table2excel(IDmodes)
+export::table2excel(IDmodes2)
 #Decision Tree :
 require(tree)
 hist(absent$`Absenteeism time in hours`)
@@ -216,11 +220,13 @@ ind <- sample(2, nrow(Absenteeism_at_work), replace = TRUE, prob = c(0.7, 0.3))
 train.data <- Absenteeism_at_work[ind == 1, ]
 test.data <- Absenteeism_at_work[ind == 2, ]
 #Then we transform the type of "Type of Absenteeism" from character to factor because kNN algo return a factor
+Absenteeism_at_work[10] <- lapply(Absenteeism_at_work[10], factor)
 test.data[10] <- lapply(test.data[10], factor)
+train.data[10] <- lapply(train.data[10], factor)
 #We create a vector with only type of Absenteeism label
 train.labels <- train.data$`Type of Absenteism`
 train.labels
-col6 <- c(8,9,10)
+col6 <- c(9,10)
 normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
@@ -232,7 +238,37 @@ new <- knn(train = dfNormTrain, test = dfNormTest, cl = train.labels,k=16)
 library(arsenal)
 compare(test.data$`Type of Absenteism`,new)
 x<-data.frame("Real"=test.data$`Type of Absenteism`,"Calculated"=new)
-
 #From the output of the algorithm, we can say that this model isn't a good one because the estimation of type of Absenteeism
 #is only accurate at 64,25%
 
+## Clustering Model
+clusterDB <- data.frame(newgoodDB,)
+classif <- newgoodDB$
+table(classif)
+col7 <- c(1:3)
+X <- newgoodDB[-col7]
+head(X)
+clPairs(X,classif)
+BIC<- mclustBIC(X)
+plot(BIC)
+index <- c(1:100)
+plot(rnorm(100),index)
+
+#Random Forest
+set.seed(123)
+library(randomForest)
+fit <- randomForest(Absenteeism_at_work$`Type of Absenteism` ~ Absenteeism_at_work$`Reason for absence`
+                    +Absenteeism_at_work$`Month of absence`
+                    +Absenteeism_at_work$`Day of the week`
+                    +Absenteeism_at_work$`Work load Average/day`
+                    +Absenteeism_at_work$`Hit target`
+                    +Absenteeism_at_work$`Distance from Residence to Work`
+                    +Absenteeism_at_work$`Service time`
+                    +Absenteeism_at_work$Age
+                    +Absenteeism_at_work$Education
+                    +Absenteeism_at_work$Son
+                    +Absenteeism_at_work$`Social drinker`
+                    +Absenteeism_at_work$`Social smoker`
+                    +Absenteeism_at_work$`Body mass index`, data = Absenteeism_at_work, na.action = na.roughfix)
+plot(fit)
+print(fit)
